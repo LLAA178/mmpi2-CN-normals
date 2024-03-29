@@ -43,11 +43,11 @@
 ```
 经过一大堆神秘数字的转换，最后量表数据也变得更加直观了。
 
-<img src="image-2.png" width="100%">
+![alt text](image-3.png)
 
 另外值得一说的是，我对370道题都进行了汉化。举个例子：
 ```
-1.   The only interesting part of newspapers is the comic strips.
+312. The only interesting part of newspapers is the comic strips.
 直译：报纸上唯一有趣的就是连环漫画。
 ```
 如果现在是20世纪末那么这个题还不错，但是这是2024的中国，谁还看报纸啊。

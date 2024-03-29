@@ -110,7 +110,7 @@ function removeTextByTextContent(textContent) {
 }
 function removeTextByTextContent2(textContent) {
   // 获取所有span元素
-  var spans2 = document.getElementsByTagName('span2');
+  //var spans2 = document.getElementsByTagName('span2');
   // 遍历span元素
   for (var i = spans2.length - 1; i >= 0; i--) {
     // 如果span元素的文本内容匹配给定的文本
@@ -119,6 +119,17 @@ function removeTextByTextContent2(textContent) {
       spans2[i].parentNode.removeChild(spans2[i]);
     }
   }
+}
+function generateRandomArray(arrayLength) {
+  const min = 30;
+  const max = 80;
+  let randomArray = [];
+
+  for (let i = 0; i < arrayLength; i++) {
+    randomArray.push(Math.floor(Math.random() * (max - min + 1)) + min);
+  }
+
+  return randomArray;
 }
 function clearContent() {
   // 获取body元素
@@ -424,8 +435,8 @@ function clearContent() {
           alert("侦测到您的临床量表中有值是undefined，您可能没能很好理解题意，导致了误选。您的数据已经超出了量表的衡量范围。详见github issue   （https://github.com/MMPI-CHN/MMPI-CHN.github.io/issues/3）");
         }
     }
-
-
+    //生成随机队列 debug用
+    //tscoreArray = generateRandomArray(tscoreArray.length)
     // 根据性别，打出效度量表、临床量表及内容量表的剖析图。可能还会添加特殊项目量表。
     profile = start_to_creat_profile(tscoreArray);
 
@@ -459,31 +470,25 @@ function clearContent() {
         ans.push("?");
       }
     }
-/*
-    ans = [
-    "", 
-    "T", "T", "T", "T", "F",  "T", "T", "T", "T", "T",   "F", "T", "T", "T", "F",  "T", "F", "F", "T", "T",
-    "T", "T", "F", "F", "T",  "F", "T", "F", "T", "F",   "F", "F", "T", "F", "T",  "F", "T", "T", "F", "F",
-    "T", "F", "T", "F", "T",  "F", "T", "T", "F", "F",   "T", "F", "F", "T", "F",  "F", "F", "T", "F", "F",
-    "T", "F", "T", "F", "T",  "F", "T", "T", "F", "F",   "F", "F", "F", "F", "T",  "T", "T", "F", "F", "F",
-    "T", "F", "F", "F", "T",  "F", "F", "F", "F", "F",   "T", "F", "F", "F", "T",  "F", "F", "T", "F", "F",
-    "F", "T", "T", "F", "T",  "T", "F", "F", "T", "T",   "F", "T", "T", "F", "T",  "F", "T", "T", "F", "F",
-    "F", "T", "F", "T", "F",  "F", "F", "F", "F", "F",   "F", "F", "F", "T", "F",  "T", "F", "F", "T", "F",
-    "T", "F", "F", "F", "F",  "F", "F", "T", "F", "F",   "T", "T", "T", "T", "F",  "F", "T", "F", "T", "F",
-    "F", "F", "F", "T", "T",  "F", "F", "F", "T", "F",   "T", "F", "T", "T", "F",  "T", "T", "F", "T", "T",
-    "T", "T", "T", "T", "F",  "T", "T", "F", "T", "F",   "T", "F", "F", "F", "T",  "F", "F", "F", "T", "T",
-    "T", "F", "T", "T", "T",  "T", "F", "T", "T", "F",   "F", "F", "T", "T", "T",  "F", "T", "T", "T", "F",
-    "F", "T", "T", "F", "T",  "F", "T", "F", "F", "T",   "T", "F", "F", "T", "F",  "T", "F", "F", "T", "F",
-    "F", "T", "F", "T", "T",  "F", "F", "T", "T", "T",   "F", "F", "F", "F", "T",  "T", "T", "T", "F", "T",
-    "T", "T", "F", "F", "F",  "T", "F", "T", "T", "T",   "T", "F", "F", "F", "F",  "F", "F", "T", "T", "T",
-    "T", "F", "T", "T", "T",  "T", "F", "T", "F", "F",   "F", "F", "T", "F", "T",  "F", "T", "F", "F", "F",
-    "F", "T", "F", "T", "T",  "F", "F", "T", "F", "F",   "F", "F", "F", "T", "T",  "T", "F", "T", "F", "F",
-    "T", "F", "T", "T", "T",  "F", "F", "T", "F", "T",   "F", "F", "F", "F", "T",  "F", "T", "T", "F", "F",
-    "F", "F", "F", "T", "F",  "F", "T", "F", "T", "T",   "F", "T", "F", "T", "F",  "F", "T", "F", "F", "T",
-    "F", "T", "F", "F", "T",  "F", "T", "F", "F", "F",
- ];
-*/
 
+    let rawData = `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
+    TFTFT   FTFTF   TFFTF   FTTFF   TFTTF   FTTFF   FFFFT   TTFFF
+    
+    TFTFT   FFFFF   FFTFT   FFTFF   FTTFT   TFFTT   FTTFT   FTTFF
+    FFTFT   FFFFF   FFFTF   TFFTF   TTFFF   FFTFF   TTTTF   FTFTF
+    
+    FFTTT   TFFTF   TFTTF   TTFTF   TFTTF   TTFTF   TFFFT   FFTFT
+    TFTTT   TFTTT   FFTTF   FTFFF   FTTTF   FTFFF   TFFTF   TFFTF
+    
+    FFFTT   FFTTT   FFFFT   FTFTT   TTFFT   TTTTT   TTFFF   FFTTT
+    TFTTT   TFTFF   FFTFT   FTFFF   FTFFF   FFFFF   FFFTT   TFTFF
+    
+    TFTTF   FFFFT   FFFFF   FFTFF   FFFTF   FTFTF   FTFTF   FTFFT
+    FTFTT   FTFFF`;
+
+    //ans = rawData.replace(/\s+/g, '').split('');
+    //ans.unshift("");
+    //console.log(ans);
     profile = score();
 
 
@@ -529,7 +534,7 @@ function clearContent() {
     document.body.appendChild(document.createElement('br'));
     document.body.appendChild(document.createElement('br'));
     document.body.appendChild(span);
-    document.body.appendChild(span2);
+    //document.body.appendChild(span2);
     return profile;
   }
   
@@ -868,15 +873,19 @@ let profileTScoreArray = tscoreArray.slice(6,17); //取十个临床量表
     codeType = findTopTwoScores(profileTScoreArray);  //codeType[i]+1%10即为正确维度标志
     codeType[0] = (codeType[0] + 1) % 10;
     codeType[1] = (codeType[1] + 1) % 10;
+    //取余后可能顺序发生改变 需要重排
     if(codeType[0] > codeType[1]){
       let tmp = codeType[0];
       codeType[0] = codeType[1];
       codeType[1] = tmp;
     }
+    /*
     if(codeType[0] === codeType[1])
       codeType[0]=codeType[1]=0;
     codeType[0] = isNaN(codeType[0])? 0 : codeType[0];
-    codeType[1] = isNaN(codeType[1])? 0 : codeType[1];
+    codeType[1] = isNaN(codeType[1])? 0 : codeType[1];*/
+    if(isNaN(codeType[0])||isNaN(codeType[1]))
+      codeType[0] = codeType[1] = 0;
     let cnScale = ["社会内向","疑病","抑郁","癔症","精神病态","","偏执","精神衰弱","精神分裂","轻躁狂"];
     cnScale[5] = gender? "男性气质" : "女性气质";
     // 创建标题元素
