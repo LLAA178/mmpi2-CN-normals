@@ -208,14 +208,41 @@
       }
       </script>
       
-      <form id="select_all" name="questions" action="https://formspree.io/f/xpzvylav" method="POST">
-        <!-- 其他内容省略 -->
-        <script type="text/javascript">my_doc_write_all_questions();</script>
-        <button class="my_button" type="submit" onclick="removeRequired();score_rb(document.forms.questions); return true;">
-          <span>提交测试并发送结果</span>
-        </button>
-        <!-- 其他内容省略 -->
-      </form>
+      <script type="text/javascript">
+        function submitForm(e) {
+          e.preventDefault(); // 阻止表单的默认提交行为
+        
+          var score = score_rb(document.forms.questions); // 获取分数
+        
+          // 创建一个新的 FormData 对象，并添加分数
+          var formData = new FormData(document.forms.questions);
+          formData.append('score', JSON.stringify(score));
+        
+          // 使用 fetch 发送异步请求
+          fetch('https://formspree.io/f/xpzvylav', {
+            method: 'POST',
+            body: formData
+          }).then(response => {
+            if (response.ok) {
+              console.log('提交成功');
+            } else {
+              console.error('提交失败');
+            }
+          }).catch(error => {
+            console.error('发生错误:', error);
+          });
+        }
+        </script>
+                                                                              <!-- onclick="removeRequired();"--> 
+        <form id="select_all" name="questions" action="https://formspree.io/f/xpzvylav" method="POST" onsubmit="submitForm(event);">
+          <!-- 其他内容省略 -->
+          <script type="text/javascript">my_doc_write_all_questions();</script>
+          <button class="my_button" type="submit">
+            <span>提交测试</span>
+          </button>
+          <!-- 其他内容省略 -->
+        </form>
+        
       
   
   </div>
