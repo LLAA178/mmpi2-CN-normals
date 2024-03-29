@@ -154,9 +154,9 @@
 
   <form name="config" action="#">
     <p>
-      Assigned sex <br>您的性别:<br>
-      <input type="radio" name="gender" value="M" onclick="set_gender(0);" checked="">Male
-      <input type="radio" name="gender" value="F" onclick="set_gender(1);">Female
+      您的性别:<br>
+      <input type="radio" name="gender" value="M" onclick="set_gender(0);" checked="">男性
+      <input type="radio" name="gender" value="F" onclick="set_gender(1);">女性
     </p>
   <!--
     <p>
@@ -167,43 +167,56 @@
   -->
   </form>
 
-  <!-- 2023.11.15 尝试用trick来白嫖表单收集次数 -->
-  <!-- 只是更改action的内容，康康会不会被出警 -->
-  <!-- https://formspree.io/f/mgebzeqq 对应的是Crime1 -->
-  <!-- https://formspree.io/f/mknlaree 对应的是Crime2 -->
-  <!-- https://formspree.io/f/myyqajok 对应的是Crime3 -->
-  <!-- https://formspree.io/f/xoqgvzbr 对应的是Crime4 -->
-<!--   <form id="select_all" name="questions" action="https://formspree.io/f/mgebzeqq" method="POST"> -->
-<!--   <form id="select_all" name="questions" action="https://formspree.io/f/myyqajok" method="POST"> -->
+  <script type="text/javascript">
+    function autoFillAnswers() {
+      let rawData = `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
+    TFTFT   FTFTF   TFFTF   FTTFF   TFTTF   FTTFF   FFFFT   TTFFF
+    
+    TFTFT   FFFFF   FFTFT   FFTFF   FTTFT   TFFTT   FTTFT   FTTFF
+    FFTFT   FFFFF   FFFTF   TFFTF   TTFFF   FFTFF   TTTTF   FTFTF
+    
+    FFTTT   TFFTF   TFTTF   TTFTF   TFTTF   TTFTF   TFFFT   FFTFT
+    TFTTT   TFTTT   FFTTF   FTFFF   FTTTF   FTFFF   TFFTF   TFFTF
+    
+    FFFTT   FFTTT   FFFFT   FTFTT   TTFFT   TTTTT   TTFFF   FFTTT
+    TFTTT   TFTFF   FFTFT   FTFFF   FTFFF   FFFFF   FFFTT   TFTFF
+    
+    TFTTF   FFFFT   FFFFF   FFTFF   FFFTF   FTFTF   FTFTF   FTFFT
+    FTFTT   FTFFF`;
 
-
-  <form id="select_all" name="questions" action="https://formspree.io/f/xpzvylav" method="POST">
-    <p>
-      <script type="text/javascript">my_doc_write_all_questions();</script>
-      <!-- 2023.5.26添加按钮的注释 -->
-      <div style="width:60%; margin:0 auto;text-align:center; color:#B0C4DE;font-family:KaiTi;">
-        <p>“发送结果”按钮表示您愿意将结果以匿名的方式发给我们留底，“提交测试”按钮则是在当前页面呈现您的测试结果。无论如何，都请您先点击“提交测试”按钮，以避免浏览器卡死导致测试白做。</p>
-      </div>
+      var answers = rawData.replace(/\s+/g, '').split('');
+    
+      // 获取所有的问题元素
+      var questions = document.forms.questions.elements;
+    
+      // 遍历所有的问题，并设置答案
+      for (var i = 0; i < questions.length; i++) {
+        questions["Q"+i][0].value = answers[i];
+      }
+    }
+    </script>
+    
+    <script type="text/javascript">
+      function removeRequired() {
+        // 获取所有的输入元素
+        var inputs = document.forms.questions.getElementsByTagName('input');
       
-      <button class="my_button" type="submit" name="check" value="meow~~"><span>发送结果</span></button>
-      <!-- 花招：当form中只有一个button时，这个button将会被视为submit，进而触发required，使得无法空题。
-            问题：submit是不是也可以直接挂一个onclick？反正在没有后端的情况下，submit也不会“报错” -->
-      <br> 
-      <input class="my_button" type="button" value="提交测试" onclick="score_rb(document.forms.questions);">
-      <br>
+        // 遍历所有的输入元素，并移除 'required' 属性
+        for (var i = 0; i < inputs.length; i++) {
+          inputs[i].removeAttribute('required');
+        }
+      }
+      </script>
       
-      <!-- For Debuging... 
-      <input class="my_button" type="button" value="Debug" onclick="my_test();">
-      <br> 
-      <input class="my_button" type="button" value="绘制人格剖析图" onclick="creat_trait_profile();">
-      <input class="my_button" type="button" value="精神逐渐异常" onclick="selectAll();">
+      <form id="select_all" name="questions" action="https://formspree.io/f/xpzvylav" method="POST">
+        <!-- 其他内容省略 -->
+        <script type="text/javascript">my_doc_write_all_questions();</script>
+        <button class="my_button" type="submit" onclick="removeRequired();score_rb(document.forms.questions); return true;">
+          <span>提交测试并发送结果</span>
+        </button>
+        <!-- 其他内容省略 -->
+      </form>
       
-
-      <button name="提交测试" value="提交测试" onclick="score_rb(document.forms.questions);">提交测试</button> 
-      -->
-      <br><br>
-    <p></p>
-  </form>
   
   </div>
 
