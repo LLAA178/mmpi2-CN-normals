@@ -459,7 +459,7 @@ function clearContent() {
         ans.push("?");
       }
     }
-
+/*
     ans = [
     "", 
     "T", "T", "T", "T", "F",  "T", "T", "T", "T", "T",   "F", "T", "T", "T", "F",  "T", "F", "F", "T", "T",
@@ -482,7 +482,7 @@ function clearContent() {
     "F", "F", "F", "T", "F",  "F", "T", "F", "T", "T",   "F", "T", "F", "T", "F",  "F", "T", "F", "F", "T",
     "F", "T", "F", "F", "T",  "F", "T", "F", "F", "F",
  ];
-
+*/
 
     profile = score();
 
