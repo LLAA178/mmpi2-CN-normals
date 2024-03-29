@@ -513,10 +513,10 @@ function clearContent() {
     span.style.textAlign= 'center'; // 设置居中对齐
     span.style.color = '#B0C4DE'; // 设置文字颜色
     span.style.fontFamily = 'KaiTi'; // 设置字体为楷体
-    span2.style.display = 'block'
-    span2.style.textAlign= 'center'; // 设置居中对齐
-    span2.style.color = '#B0C4DE'; // 设置文字颜色
-    span2.style.fontFamily = 'KaiTi'; // 设置字体为楷体
+    //span2.style.display = 'block'
+    //span2.style.textAlign= 'center'; // 设置居中对齐
+    //span2.style.color = '#B0C4DE'; // 设置文字颜色
+    //span2.style.fontFamily = 'KaiTi'; // 设置字体为楷体
    
     // 插入三个空白行
     document.body.appendChild(document.createElement('br'));
