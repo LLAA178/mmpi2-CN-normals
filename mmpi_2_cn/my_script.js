@@ -471,7 +471,8 @@ function clearContent() {
       }
     }
 
-    let rawData = `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
+    let rawData = 
+    `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
     TFTFT   FTFTF   TFFTF   FTTFF   TFTTF   FTTFF   FFFFT   TTFFF
     
     TFTFT   FFFFF   FFTFT   FFTFF   FTTFT   TFFTT   FTTFT   FTTFF
