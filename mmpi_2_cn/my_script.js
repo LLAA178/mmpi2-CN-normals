@@ -301,24 +301,11 @@ function clearContent() {
       // Add scale results to scale table
       // T score table must be defined, otherwise this is a critical item
       if (tscale !== undefined) {
-        // Capture K for future use
-        if (scales[i][0][0] === "K") { k = rawscore; }
-        // If there is a K correction, use it
-        if (tscale[0]) {
-          // Adjust with K
-          kscore = k * tscale[0] + rawscore;
-          // Round off and make integer
-          //kscore = Math.floor(kscore + 0.5);
-          // T score lookup of corrected score
-          //tscore = tscale[kscore + 1];
-          tscore = (kscore - tscale[1]) / tscale[2] * 10 + 50;
-          
-          // No K correction
-        } else {
-          // K score is undefinded
-          kscore = undefined;
-          // T score lookup of raw score
-          //tscore = tscale[rawscore + 1];
+        kscore = undefined;
+        if (scales[i][0][2] === "Masculinity-Femininity - Female"){
+          tscore = -(rawscore - tscale[1]) / tscale[2] * 10 + 50;
+        }
+        else{
           tscore = (rawscore - tscale[1]) / tscale[2] * 10 + 50;
         }
         //tscore = Math.floor(tscore + 0.5);
@@ -438,6 +425,7 @@ function clearContent() {
     //生成随机队列 debug用
     //tscoreArray = generateRandomArray(tscoreArray.length)
     // 根据性别，打出效度量表、临床量表及内容量表的剖析图。可能还会添加特殊项目量表。
+    console.log(rawscoreArray);
     profile = start_to_creat_profile(tscoreArray);
 
     // 根据结果（T分），打出对应的诊断。以表格方式呈现。
@@ -461,6 +449,7 @@ function clearContent() {
   // Fill the answer array with radio button state and score
   function score_rb(form) {
     use_long_form(false);
+  
     ans = [undefined];
     for (let i = 1; i < questions.length; ++i) {
       let rbv = radio_value(form.elements["Q" + i]);
@@ -833,6 +822,7 @@ function clearContent() {
     percentileArray.push(calculatePercentile(tScore).toFixed(2));
   });
 
+    console.log(tscoreArray);
 // 输出百分比数组
     console.log(percentileArray);
 

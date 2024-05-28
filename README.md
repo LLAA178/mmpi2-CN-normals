@@ -43,7 +43,7 @@
 ```
 经过一大堆神秘数字的转换，最后量表数据也变得更加直观了。
 
-![alt text](image-3.png)
+![alt text](image-7.png)
 
 另外值得一说的是，我对370道题都进行了汉化。举个例子：
 ```
@@ -63,4 +63,4 @@
 ![alt text](image-5.png)
 
 这是最后对每个维度的常规说明。
-![alt text](image-6.png)
+![alt text](image-8.png)
