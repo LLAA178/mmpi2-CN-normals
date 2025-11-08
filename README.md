@@ -7,7 +7,7 @@
 首先，最关键的问题，我的中国常模是哪来的？因为常模数据一般是不公开的，我在市面上见过的mmpi-2测试都是基于美国常模的，无一例外，而中国常模数据一般只有医院，研究所这些才会有。而美国常模的最大问题当然是不准，尤其是在量表F，量表2(抑郁)，量表8(精分)这几个维度我们如果用美国常模会明显偏高。
 
 所以我尝试在网上找有没有学术文章公布了常模，大概看了这些[1](https://www.zhangqiaokeyan.com/detail/0201227032509.html)[2](https://www.zhangqiaokeyan.com/detail/020121005674.html)[3](https://www.zhangqiaokeyan.com/detail/02012103952420.html)[4](https://www.zhangqiaokeyan.com/detail/0201231787655.html)[5](https://www.zhangqiaokeyan.com/detail/0201223596851.html),最后终于在一个对比正常人和精分患者的mmpi-2结果的论文里找到了常模数据[6](https://www.zhangqiaokeyan.com/detail/0201237619888.html)。这个常模调查了正常人1245例，男女人数差不多，从初中到硕士以上学历也都有，可信度还是不错的。
-<img src="image.png" width="30%"><img src="image-1.png" width="29%">
+<img src="images/image.png" width="30%"><img src="images/image-1.png" width="29%">
 
 --------------------------------------------------------
 然后我发现一个问题，mmpi得到的分数都是正态分布的分，T分几乎有80%都在40~60之间，这样并不直观，能不能把正态分布分转换成百分比呢？答案是可以的，只是需要一点简单的数学技巧，具体可以看代码。
@@ -43,7 +43,7 @@
 ```
 经过一大堆神秘数字的转换，最后量表数据也变得更加直观了。
 
-![alt text](image-7.png)
+![alt text](images/image-7.png)
 
 另外值得一说的是，我对370道题都进行了汉化。举个例子：
 ```
@@ -60,7 +60,7 @@
 
 -------------------------------------------------------
 还有工作量最大的一点，其实还是对于剖面图的解析，我这里采用了两点编码型，但是有10个临床量表两两组合构成编码型，还是有很多的编码，并且这个需要参考大量的书籍里对编码型的解读，这是一个示例。
-![alt text](image-5.png)
+![alt text](images/image-5.png)
 
 这是最后对每个维度的常规说明。
-![alt text](image-8.png)
+![alt text](images/image-8.png)

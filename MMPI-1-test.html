@@ -10,12 +10,10 @@
 
 
   <title>MMPI-2中文测试</title>
+  <script type="text/javascript" src="mmpi_2_cn/modules/render.js"></script>
   <script type="text/javascript" src="mmpi_2_cn/my_data.js"></script>
   <script type="text/javascript" src="mmpi_2_cn/my_script.js"></script>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-
-  <link rel="shortcut icon" href="logo.jpg" type="image/x-icon">
   
 
   <!-- <link rel="stylesheet" href="./front_page/main.css"> -->
@@ -24,7 +22,6 @@
 	body {background-color: #1b1f22;
         /*background-image: linear-gradient(#1b1f22, #708090);*/
     }
-
     .modal {
       position: fixed;
       top: 0;
@@ -36,8 +33,6 @@
       justify-content: center;
       align-items: center;
       z-index: 9999;
-
-      
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -158,13 +153,6 @@
       <input type="radio" name="gender" value="M" onclick="set_gender(0);" checked="">男性
       <input type="radio" name="gender" value="F" onclick="set_gender(1);">女性
     </p>
-  <!--
-    <p>
-      Test 567 / 370:<br>测试版本：完整版（567） 或 简略版（370）<br>
-      <input type="radio" name="testform" value="L" onclick="use_long_form(true);" checked="">Long
-      <input type="radio" name="testform" value="S" onclick="use_long_form(false);">Short
-    </p>
-  -->
   </form>
       
     
@@ -183,13 +171,10 @@
       <script type="text/javascript">
         function submitForm(e) {
           e.preventDefault(); // 阻止表单的默认提交行为
-        
           var score = score_rb(document.forms.questions); // 获取分数
-        
           // 创建一个新的 FormData 对象，并添加分数
           var formData = new FormData(document.forms.questions);
           formData.append('score', JSON.stringify(score));
-        
           // 使用 fetch 发送异步请求
           fetch('https://formspree.io/f/xpzvylav', {
             method: 'POST',
