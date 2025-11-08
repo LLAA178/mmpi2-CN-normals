@@ -166,35 +166,7 @@
     </p>
   -->
   </form>
-
-  <script type="text/javascript">
-    function autoFillAnswers() {
-      let rawData = `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
-    TFTFT   FTFTF   TFFTF   FTTFF   TFTTF   FTTFF   FFFFT   TTFFF
-    
-    TFTFT   FFFFF   FFTFT   FFTFF   FTTFT   TFFTT   FTTFT   FTTFF
-    FFTFT   FFFFF   FFFTF   TFFTF   TTFFF   FFTFF   TTTTF   FTFTF
-    
-    FFTTT   TFFTF   TFTTF   TTFTF   TFTTF   TTFTF   TFFFT   FFTFT
-    TFTTT   TFTTT   FFTTF   FTFFF   FTTTF   FTFFF   TFFTF   TFFTF
-    
-    FFFTT   FFTTT   FFFFT   FTFTT   TTFFT   TTTTT   TTFFF   FFTTT
-    TFTTT   TFTFF   FFTFT   FTFFF   FTFFF   FFFFF   FFFTT   TFTFF
-    
-    TFTTF   FFFFT   FFFFF   FFTFF   FFFTF   FTFTF   FTFTF   FTFFT
-    FTFTT   FTFFF`;
-
-      var answers = rawData.replace(/\s+/g, '').split('');
-    
-      // 获取所有的问题元素
-      var questions = document.forms.questions.elements;
-    
-      // 遍历所有的问题，并设置答案
-      for (var i = 0; i < questions.length; i++) {
-        questions["Q"+i][0].value = answers[i];
-      }
-    }
-    </script>
+      
     
     <script type="text/javascript">
       function removeRequired() {
@@ -233,7 +205,7 @@
           });
         }
         </script>
-                                                                              <!-- onclick="removeRequired();"--> 
+                                                                              
         <form id="select_all" name="questions" action="https://formspree.io/f/xpzvylav" method="POST" onsubmit="submitForm(event);">
           <!-- 其他内容省略 -->
           <script type="text/javascript">my_doc_write_all_questions();</script>

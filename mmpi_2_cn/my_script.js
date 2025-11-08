@@ -1,4 +1,3 @@
-// 在文件开头添加
 const DEBUG_MODE = true;
 // Append text to the DOM
 function append_text(txt) {
@@ -1281,15 +1280,3 @@ function selectAll() {
     inputs[i].checked = true;
   }
 }
-
-// GPT牛逼
-// var form = document.getElementById("myForm");
-// var inputs = form.querySelectorAll('input[type="radio"]');
-// var value = "male";
-
-// for (var i = 0; i < inputs.length; i++) {
-//   if(inputs[i].value === value){
-//     inputs[i].checked = true;
-//     break;
-//   }
-// }
