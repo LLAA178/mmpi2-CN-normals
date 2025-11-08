@@ -1,3 +1,5 @@
+// 在文件开头添加
+const DEBUG_MODE = true;
 // Append text to the DOM
 function append_text(txt) {
     let docbody = document.getElementsByTagName("body")[0];
@@ -605,6 +607,12 @@ function clearContent() {
     //var scoreArray = score_rb(document.forms.questions);
     //将结果转换为字符串并存储在隐藏字段中
     //document.getElementById('scoreResults').value = JSON.stringify(scoreArray);
+  // 如果是 Debug 模式，允许不作答直接提交
+    if (DEBUG_MODE) {
+      removeRequired();     // 去掉 required 属性，防止强制作答
+      // 如需预填答案，可调用 autoFillAnswers()
+      // autoFillAnswers();
+    }
   }
   
   //function my_doc_write_question(name, text, text_zh) {
@@ -892,8 +900,45 @@ let profileTScoreArray = tscoreArray.slice(6,17); //取十个临床量表
     // 将标题和描述元素插入到剖面图元素下方
     profileChart.parentNode.insertBefore(title, profileChart.nextSibling);
     profileChart.parentNode.insertBefore(description, title.nextSibling);
+    return codeType;
   }
   
+  function renderProfiles(codeType) {
+    try {
+      var containerTherapy = document.getElementById('therapyText');
+      var containerTherapist = document.getElementById('therapistText');
+      if (!containerTherapy || !containerTherapist) return;
+  
+      // 目前仅对 48/84 做精确匹配；其他编码回退使用通用段落（索引 0）
+      var idx = 0;
+      if (Array.isArray(codeType) && codeType.length === 2) {
+        var a = codeType[0], b = codeType[1];
+        if ((a === 4 && b === 8) || (a === 8 && b === 4)) {
+          idx = 0;
+        } else {
+          idx = 0; // 回退到通用
+        }
+      }
+  
+      var therapyText = (typeof treatmentArray !== 'undefined' && treatmentArray[idx] && treatmentArray[idx][0])
+        ? treatmentArray[idx][0]
+        : '（暂无匹配的疗法建议，已显示通用建议。）';
+  
+      var therapistText = (typeof therapistArray !== 'undefined' && therapistArray[idx] && therapistArray[idx][0])
+        ? therapistArray[idx][0]
+        : '（暂无匹配的咨询师解读，已显示通用解读。）';
+  
+
+        containerTherapy.textContent  = therapyText;
+        containerTherapist.textContent = therapistText;
+    
+        // 关键：填充文案后再显示隐藏区域
+        document.getElementById('therapyProfile').style.display    = 'block';
+        document.getElementById('therapistProfile').style.display = 'block';
+      } catch (e) {
+        console.error('renderProfiles error:', e);
+      }
+  }
   // 假设tscoreArray已经定义并包含分数
   // 例如：let tscoreArray = [55, 62, 70, 58, 65, 60, 75, 80, 55, 50];
   // 调用函数并输出结果
@@ -906,7 +951,8 @@ let profileTScoreArray = tscoreArray.slice(6,17); //取十个临床量表
   //creat_trait_profile_2(tscoreArray);
   // creat_trait_profile_3();
   // 调用函数以添加描述
-  addDescriptionBelowProfile();
+  const codeForProfiles = addDescriptionBelowProfile();
+  renderProfiles(codeForProfiles);
   return profileTScoreArray;
 }
 
