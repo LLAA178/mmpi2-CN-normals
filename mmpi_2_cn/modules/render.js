@@ -71,6 +71,26 @@ function ensureProfileTextBlocks(){
 }
 
 function renderProfiles(codeType) {
+  function normalizeTwoPoint(ct){
+    // Prefer explicit override from DEBUG if present
+    if (Array.isArray(window.__DEBUG_FORCED_CODETYPE) && window.__DEBUG_FORCED_CODETYPE.length===2){
+      return [Math.min(window.__DEBUG_FORCED_CODETYPE[0], window.__DEBUG_FORCED_CODETYPE[1]), Math.max(window.__DEBUG_FORCED_CODETYPE[0], window.__DEBUG_FORCED_CODETYPE[1])];
+    }
+    if (Array.isArray(ct) && ct.length===2){
+      return [Math.min(ct[0], ct[1]), Math.max(ct[0], ct[1])];
+    }
+    if (typeof ct === 'number') { ct = String(ct); }
+    if (typeof ct === 'string'){
+      const m = ct.trim().match(/^([0-9])([0-9])$/);
+      if (m){
+        const a = parseInt(m[1],10);
+        const b = parseInt(m[2],10);
+        return [Math.min(a,b), Math.max(a,b)];
+      }
+    }
+    return null;
+  }
+  const norm = normalizeTwoPoint(codeType);
   try {
     ensureProfileTextBlocks();
     var containerTherapy   = document.getElementById('therapyText');
@@ -80,10 +100,9 @@ function renderProfiles(codeType) {
     var therapyText   = '（暂无匹配的疗法建议，已显示通用建议。）';
     var therapistText = '（暂无匹配的咨询师解读，已显示通用解读。）';
 
-    if (Array.isArray(codeType) && codeType.length === 2) {
-      var a = Math.min(codeType[0], codeType[1]);
-      var b = Math.max(codeType[0], codeType[1]);
-
+    if (norm) {
+      var a = norm[0];
+      var b = norm[1];
       if (typeof treatmentArray !== 'undefined'){
         if (treatmentArray[a] && treatmentArray[a][b])      therapyText = treatmentArray[a][b];
         else if (treatmentArray[0] && treatmentArray[0][0]) therapyText = treatmentArray[0][0];
@@ -362,6 +381,20 @@ function start_to_print_result(tscoreArray){
   
     function addDescriptionBelowProfile() {
       var profileChart = document.getElementById('myChart1');
+      // Ensure DEBUG two-point code is available (fallback: URL -> prompt)
+      function __getDebugTwoPointLocal(){
+        try{
+          if (Array.isArray(window.__DEBUG_FORCED_CODETYPE) && window.__DEBUG_FORCED_CODETYPE.length===2){
+            return [Math.min(window.__DEBUG_FORCED_CODETYPE[0], window.__DEBUG_FORCED_CODETYPE[1]), Math.max(window.__DEBUG_FORCED_CODETYPE[0], window.__DEBUG_FORCED_CODETYPE[1])];
+          }
+          const qs = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
+          const v = qs ? qs.get('codetype') : null;
+          if (v && /^\d{2}$/.test(v)){
+            return [Math.min(+v[0], +v[1]), Math.max(+v[0], +v[1])];
+          }
+        }catch(_){ }
+        return null;
+      }
       profileTScoreArray.splice(5 - gender, 1); // 删去异性量表
       let codeType = findTopTwoScores(profileTScoreArray);
       codeType[0] = (codeType[0] + 1) % 10;
@@ -373,11 +406,33 @@ function start_to_print_result(tscoreArray){
 
       var title = document.createElement('h3');
       title.style.color = '#FFFFFF';
-      title.textContent = '受测者的编码型是: ' + codeType[0] + codeType[1] + '('+cnScale[codeType[0]]+'和'+cnScale[codeType[1]]+')';
+      (function(){
+        var titleCode = codeType;
+        if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE === true){
+          var dbg = __getDebugTwoPointLocal();
+          if (dbg){ titleCode = dbg; }
+        }
+        // 安全兜底：确保索引在0..9范围内
+        var a = Math.max(0, Math.min(9, +titleCode[0] || 0));
+        var b = Math.max(0, Math.min(9, +titleCode[1] || 0));
+        title.textContent = '受测者的编码型是: ' + a + b + '('+cnScale[a]+'和'+cnScale[b]+')';
+      })();
 
       var description = document.createElement('p');
       description.style.color = '#FFFFFF';
-      description.textContent = profileArray[codeType[0]][codeType[1]];
+      // 当 DEBUG_MODE === true 且指定了两点编码型时，优先用输入的编码型来选择 profileArray 文案
+      (function(){
+        var descCode = codeType;
+        if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE === true){
+          var dbg = __getDebugTwoPointLocal();
+          if (dbg){ descCode = dbg; }
+        }
+        var da = Math.max(0, Math.min(9, +descCode[0] || 0));
+        var db = Math.max(0, Math.min(9, +descCode[1] || 0));
+        try{
+          description.textContent = (profileArray && profileArray[da] && profileArray[da][db]) ? profileArray[da][db] : (profileArray && profileArray[0] && profileArray[0][0] ? profileArray[0][0] : '');
+        }catch(_){ description.textContent = ''; }
+      })();
 
       profileChart.parentNode.insertBefore(title, profileChart.nextSibling);
       profileChart.parentNode.insertBefore(description, title.nextSibling);
@@ -392,11 +447,20 @@ function start_to_print_result(tscoreArray){
     }
   
     const codeForProfiles = addDescriptionBelowProfile();
-    renderProfiles(codeForProfiles);
+    // Only in DEBUG, allow override for therapy/therapist text; keep profileArray description using computed code
+    if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE === true && Array.isArray(window.__DEBUG_FORCED_CODETYPE) && window.__DEBUG_FORCED_CODETYPE.length === 2){
+      renderProfiles(window.__DEBUG_FORCED_CODETYPE);
+      // 保留计算得到的两点编码型作为“最近一次编码型”以匹配页面上已插入的编码说明
+      window.__lastCodeType = codeForProfiles.slice ? codeForProfiles.slice() : codeForProfiles;
+    } else {
+      renderProfiles(codeForProfiles);
+      window.__lastCodeType = codeForProfiles.slice ? codeForProfiles.slice() : codeForProfiles;
+    }
     return profileTScoreArray;
   }
   
   // Expose globals expected by my_script.js
   window.start_to_creat_profile = start_to_creat_profile;
   window.start_to_print_result = start_to_print_result;
+  window.__getLastCodeType = function(){ return window.__lastCodeType; };
   

@@ -1,5 +1,6 @@
   // Score the test
-  function score() {
+  function score(options = {}) {
+    const { suppressRender = false } = options;
     // 调用函数以清除之前的内容
     //clearContent();
     // Change mouse pointer to wait indicator
@@ -242,13 +243,16 @@
     //tscoreArray = generateRandomArray(tscoreArray.length)
     // 根据性别，打出效度量表、临床量表及内容量表的剖析图。可能还会添加特殊项目量表。
     console.log(rawscoreArray);
+    window.__lastTscoreArray = tscoreArray;
     profile = start_to_creat_profile(tscoreArray);
 
     // 根据结果（T分），打出对应的诊断。以表格方式呈现。
     // start_to_print_result(tscoreArray);
 
     // Debug...
-    start_to_print_result(tscoreArray);
+    if (!suppressRender) {
+      start_to_print_result(tscoreArray);
+    }
     return profile;
   }
   
@@ -261,6 +265,37 @@
       }
     }
   }
+
+  // --- Debug/Profiling helpers ---
+  function withProfiling(label, fn){
+    try{
+      const t0 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      const out = fn();
+      const t1 = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      console.log(`[PROFILE:${label}] ${(t1 - t0).toFixed(3)} ms`);
+      return out;
+    }catch(e){
+      console.warn(`[PROFILE:${label}] failed`, e);
+      throw e;
+    }
+  }
+  function getDebugTwoPoint(){
+    try{
+      const qs = (typeof window !== 'undefined' && window.location) ? new URLSearchParams(window.location.search) : null;
+      const v = qs ? qs.get('codetype') : null;
+      if (v && /^\d{2}$/.test(v)){
+        return [Math.min(+v[0], +v[1]), Math.max(+v[0], +v[1])];
+      }
+    }catch(_){ }
+    try{
+      const input = (typeof prompt !== 'undefined') ? prompt('输入两点编码型（例如 12、24；留空则不覆盖）', '') : '';
+      if (input && /^\d{2}$/.test(input)){
+        return [Math.min(+input[0], +input[1]), Math.max(+input[0], +input[1])];
+      }
+    }catch(_){ }
+    return null;
+  }
+  // --- end helpers ---
 
   // Fill the answer array with radio button state and score
   function score_rb(form) {
@@ -296,7 +331,19 @@
       ans.unshift("");
       console.log(ans);
     }
-    profile = score();
+    if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE === true){
+      const override = getDebugTwoPoint();
+      if (override){
+        window.__DEBUG_FORCED_CODETYPE = override;
+      } else {
+        window.__DEBUG_FORCED_CODETYPE = undefined;
+      }
+      // "all" only: measure score (without rendering) and then measure rendering separately
+      profile = withProfiling('score', () => score({ suppressRender: true }));
+      withProfiling('render', () => start_to_print_result(window.__lastTscoreArray || []));
+    } else {
+      profile = score();
+    }
 
 
     /* 2023.11.16 尝试对undefined值做出警告 */

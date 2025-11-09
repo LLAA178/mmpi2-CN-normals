@@ -1,4 +1,4 @@
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 // Append text to the DOM
 function append_text(txt) {
     let docbody = document.getElementsByTagName("body")[0];
