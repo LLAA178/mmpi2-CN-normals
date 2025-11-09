@@ -303,10 +303,6 @@ var resultArray = [
   }
   
   // Expose globals expected by my_script.js
-  window.erf = erf;
   window.start_to_creat_profile = start_to_creat_profile;
-  window.creat_trait_profile_1_female = creat_trait_profile_1_female;
-  window.creat_trait_profile_1_male = creat_trait_profile_1_male;
-  window.creat_trait_profile_2 = creat_trait_profile_2;
   window.start_to_print_result = start_to_print_result;
-  window.renderProfiles = renderProfiles;
+  
