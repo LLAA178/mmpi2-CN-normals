@@ -297,6 +297,77 @@
   }
   // --- end helpers ---
 
+  // --- Utilities: parse 370 TF answers from a raw txt export ---
+  function parseAnswersFromText(text){
+    const lines = text.split(/\r?\n/).map(l => l.trim());
+    const answers = [""]; // index 0 is a dummy to keep Q numbering aligned (1..370)
+    let lastQ = null;
+    for (let i = 0; i < lines.length && answers.length <= 370; i++){
+      const line = lines[i];
+      if (!line) continue;
+      const qm = /^Q(\d{1,3})\b/.exec(line);
+      if (qm){
+        lastQ = parseInt(qm[1], 10);
+        continue;
+      }
+      if ((line === 'T' || line === 'F') && lastQ !== null){
+        while (answers.length < lastQ) answers.push("?");
+        answers[lastQ] = line;
+        lastQ = null;
+        continue;
+      }
+    }
+    while (answers.length <= 370) answers.push("?");
+    return answers.slice(0, 371); // indices 0..370
+  }
+
+  async function loadAnswersFromTxt(url){
+    const resolved = (typeof document !== 'undefined' && document.baseURI) ? new URL(url, document.baseURI).href : url;
+    const res = await fetch(resolved, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    return parseAnswersFromText(text);
+  }
+
+  function promptForLocalTxt(){
+    return new Promise((resolve, reject) => {
+      try{
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.txt,text/plain';
+        input.style.display = 'none';
+        document.body.appendChild(input);
+        input.addEventListener('change', () => {
+          const file = input.files && input.files[0];
+          if (!file){
+            document.body.removeChild(input);
+            return reject(new Error('未选择文件'));
+          }
+          const reader = new FileReader();
+          reader.onload = () => {
+            try{
+              const parsed = parseAnswersFromText(String(reader.result || ''));
+              document.body.removeChild(input);
+              resolve(parsed);
+            }catch(e){
+              document.body.removeChild(input);
+              reject(e);
+            }
+          };
+          reader.onerror = () => {
+            document.body.removeChild(input);
+            reject(new Error('读取文件失败'));
+          };
+          reader.readAsText(file, 'utf-8');
+        }, { once: true });
+        input.click();
+      }catch(e){
+        reject(e);
+      }
+    });
+  }
+  // --- end utilities ---
+
   // Fill the answer array with radio button state and score
   function score_rb(form) {
     use_long_form(false);
@@ -311,39 +382,42 @@
       }
     }
 
-    let rawData = 
-    `TTTFF   TTTTT   FTTTF   TFFTT   TTFFT   FTFTF   FFTFT   FTFTF
-    TFTFT   FTFTF   TFFTF   FTTFF   TFTTF   FTTFF   FFFFT   TTFFF
-    
-    TFTFT   FFFFF   FFTFT   FFTFF   FTTFT   TFFTT   FTTFT   FTTFF
-    FFTFT   FFFFF   FFFTF   TFFTF   TTFFF   FFTFF   TTTTF   FTFTF
-    
-    FFTTT   TFFTF   TFTTF   TTFTF   TFTTF   TTFTF   TFFFT   FFTFT
-    TFTTT   TFTTT   FFTTF   FTFFF   FTTTF   FTFFF   TFFTF   TFFTF
-    
-    FFFTT   FFTTT   FFFFT   FTFTT   TTFFT   TTTTT   TTFFF   FFTTT
-    TFTTT   TFTFF   FFTFT   FTFFF   FTFFF   FFFFF   FFFTT   TFTFF
-    
-    TFTTF   FFFFT   FFFFF   FFTFF   FFFTF   FTFTF   FTFTF   FTFFT
-    FTFTT   FTFFF`;
-    if(DEBUG_MODE){
-      ans = rawData.replace(/\s+/g, '').split('');
-      ans.unshift("");
-      console.log(ans);
+    // In DEBUG mode, parse answers from the exported txt instead of using a hardcoded string
+    if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE) {
+      const tryFetch = () => loadAnswersFromTxt('database/rawdata.txt');
+      const tryLocalPick = () => promptForLocalTxt();
+
+      const loadPromise = (window.location && window.location.protocol === 'file:')
+        ? tryLocalPick()
+        : tryFetch().catch((err) => {
+            console.warn('Fetch failed, falling back to local file picker:', err);
+            return tryLocalPick();
+          });
+
+      loadPromise
+        .then((parsed) => {
+          ans = parsed;
+          console.log(ans);
+
+          const override = getDebugTwoPoint();
+          if (override){
+            window.__DEBUG_FORCED_CODETYPE = override;
+          } else {
+            window.__DEBUG_FORCED_CODETYPE = undefined;
+          }
+          // "all" only: measure score (without rendering) and then measure rendering separately
+          profile = withProfiling('score', () => score({ suppressRender: true }));
+          withProfiling('render', () => start_to_print_result(window.__lastTscoreArray || []));
+        })
+        .catch((err) => {
+          console.error('无法加载 rawdata.txt：', err);
+          alert('读取并解析 database/rawdata.txt 失败，且本地选择也未成功：' + err.message + '\n\n' +
+                '建议：\n1) 使用 HTTP 服务运行本项目（如 VSCode Live Server / npx http-server），\n' +
+                '2) 或者在弹出的文件选择框中选择 rawdata.txt。');
+        });
+      return; // stop here; async path will render when ready
     }
-    if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE === true){
-      const override = getDebugTwoPoint();
-      if (override){
-        window.__DEBUG_FORCED_CODETYPE = override;
-      } else {
-        window.__DEBUG_FORCED_CODETYPE = undefined;
-      }
-      // "all" only: measure score (without rendering) and then measure rendering separately
-      profile = withProfiling('score', () => score({ suppressRender: true }));
-      withProfiling('render', () => start_to_print_result(window.__lastTscoreArray || []));
-    } else {
-      profile = score();
-    }
+    profile = score();
 
 
     /* 2023.11.16 尝试对undefined值做出警告 */

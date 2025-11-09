@@ -221,15 +221,6 @@ function clearContent() {
     document.write("<br><br><br>");
   }
 
-// Debug...
-var myArray = [
-  ["apple", "苹果"],
-  ["banana", "香蕉"],
-  ["orange", "橙子"],
-  ["grape", "葡萄"],
-  ["watermelon", "西瓜"]
-];
-
 // 2023.5.26添加了一个移动端的简单提示信息。
 function showModalInThePhone(){
   // 创建一个包含自定义内容的 div 元素
