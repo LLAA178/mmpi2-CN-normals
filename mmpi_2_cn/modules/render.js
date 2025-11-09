@@ -14,43 +14,97 @@ function erf(x) {
     return y;
   }
   
-  function renderProfiles(codeType) {
-    try {
-      var containerTherapy   = document.getElementById('therapyText');
-      var containerTherapist = document.getElementById('therapistText');
-      if (!containerTherapy || !containerTherapist) return;
-  
-      // 目前仅对 48/84 做精确匹配；其他编码回退使用通用段落（索引 0）
-      var idx = 0;
-      if (Array.isArray(codeType) && codeType.length === 2) {
-        var a = codeType[0], b = codeType[1];
-        if ((a === 4 && b === 8) || (a === 8 && b === 4)) {
-          idx = 0;
-        } else {
-          idx = 0; // 回退到通用
-        }
-      }
-  
-      var therapyText = (typeof treatmentArray !== 'undefined' && treatmentArray[idx] && treatmentArray[idx][0])
-        ? treatmentArray[idx][0]
-        : '（暂无匹配的疗法建议，已显示通用建议。）';
-  
-      var therapistText = (typeof therapistArray !== 'undefined' && therapistArray[idx] && therapistArray[idx][0])
-        ? therapistArray[idx][0]
-        : '（暂无匹配的咨询师解读，已显示通用解读。）';
-  
-      containerTherapy.textContent   = therapyText;
-      containerTherapist.textContent = therapistText;
-  
-      // 关键：填充文案后再显示隐藏区域
-      var tp  = document.getElementById('therapyProfile');
-      var tsp = document.getElementById('therapistProfile');
-      if (tp)  tp.style.display  = 'block';
-      if (tsp) tsp.style.display = 'block';
-    } catch (e) {
-      console.error('renderProfiles error:', e);
+// —— Ensure therapy/therapist text blocks exist ——
+function ensureProfileTextBlocks(){
+  // 优先使用编码型说明段落作为锚点
+  var anchorEl = window._profile_text_anchor || document.getElementById('myCharts') || document.body;
+
+  // 读取锚点的宽度与左右外边距，保证后续区块与锚点同宽、同对齐
+  var cs = window.getComputedStyle(anchorEl);
+  var anchorWidth = cs.width;            // 例如 "860px" 或 "90%"
+  var ml = cs.marginLeft;
+  var mr = cs.marginRight;
+
+  function makeBlock(id, titleText, pId){
+    var blk = document.createElement('div');
+    blk.id = id;
+    blk.style.display = 'none';
+    blk.style.color = '#FFFFFF';
+    blk.style.margin = '20px auto';
+    blk.style.width = anchorWidth;       // 与锚点同宽
+    blk.style.marginLeft = ml;           // 与锚点对齐
+    blk.style.marginRight = mr;
+
+    var h = document.createElement('h3');
+    h.textContent = titleText;
+    h.style.margin = '0 0 8px 0';
+    h.style.color = '#FFFFFF';
+
+    var p = document.createElement('p');
+    p.id = pId;
+    p.style.whiteSpace = 'pre-wrap';
+    p.style.lineHeight = '1.6';
+    p.style.margin = '0';
+
+    blk.appendChild(h);
+    blk.appendChild(p);
+    return blk;
+  }
+
+  function insertAfter(newNode, referenceNode){
+    if (!referenceNode || !referenceNode.parentNode){
+      (document.body).appendChild(newNode);
+    } else {
+      referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
   }
+
+  if (!document.getElementById('therapyProfile')){
+    var tp = makeBlock('therapyProfile', '疗法建议', 'therapyText');
+    insertAfter(tp, anchorEl);
+    anchorEl = tp; // 下一块接在疗法建议之后
+  }
+  if (!document.getElementById('therapistProfile')){
+    var tsp = makeBlock('therapistProfile', 'Therapist 解读', 'therapistText');
+    insertAfter(tsp, anchorEl);
+  }
+}
+
+function renderProfiles(codeType) {
+  try {
+    ensureProfileTextBlocks();
+    var containerTherapy   = document.getElementById('therapyText');
+    var containerTherapist = document.getElementById('therapistText');
+    if (!containerTherapy || !containerTherapist) return;
+
+    var therapyText   = '（暂无匹配的疗法建议，已显示通用建议。）';
+    var therapistText = '（暂无匹配的咨询师解读，已显示通用解读。）';
+
+    if (Array.isArray(codeType) && codeType.length === 2) {
+      var a = Math.min(codeType[0], codeType[1]);
+      var b = Math.max(codeType[0], codeType[1]);
+
+      if (typeof treatmentArray !== 'undefined'){
+        if (treatmentArray[a] && treatmentArray[a][b])      therapyText = treatmentArray[a][b];
+        else if (treatmentArray[0] && treatmentArray[0][0]) therapyText = treatmentArray[0][0];
+      }
+      if (typeof therapistArray !== 'undefined'){
+        if (therapistArray[a] && therapistArray[a][b])      therapistText = therapistArray[a][b];
+        else if (therapistArray[0] && therapistArray[0][0]) therapistText = therapistArray[0][0];
+      }
+    }
+
+    containerTherapy.textContent   = therapyText;
+    containerTherapist.textContent = therapistText;
+
+    var tp  = document.getElementById('therapyProfile');
+    var tsp = document.getElementById('therapistProfile');
+    if (tp)  tp.style.display  = 'block';
+    if (tsp) tsp.style.display = 'block';
+  } catch (e) {
+    console.error('renderProfiles error:', e);
+  }
+}
   
   function creat_trait_profile_1_female(tscoreArray){
     let data = {
@@ -181,7 +235,9 @@ function erf(x) {
     new Chart(ctx, { type: 'line', data, options });
   }
   
-  // —— Results text blocks used by start_to_print_result ——
+
+
+// —— Results text blocks used by start_to_print_result ——
 var resultArray = [
   ["L（装好）", 70, 40, "测验结果的有效性存疑；受测者可能在有意“装好”，对自己的描述过于完美无瑕；受测者可能对测验有抵触感；受测者可能否认自己有任何缺点，不愿意承认哪怕是极微小的缺点；不现实地夸大自己的优点，声称自己符合极高的道德准则", "测验结果有效；若L的T分大于60，则受测者可能采取了“自我防御”的反应定势；受测者可能过于保守、循规蹈矩，自我要求过高、标准僵化", "T分过低，测验结果可能存在“装坏”的成分；受测者过分强调异常和病态，或过分自信而独立"],
   ["F（装坏）", 71, 56, "测验效度存疑；受测者可能不配合；可能在“装坏”；可能未能理解题目意思，无意间夸大了自己的心理问题；或者是有各方面较严重的心理障碍；但若被试是青年人，则可能是存在自我认同危机", "测验结果可能有效；显示受测者不希望被认为是传统型的，或是有较强的政治、宗教、社会信仰；自我苛刻，或是回答问题时极度坦诚；也许存在一定程度的心理失常的问题", "测试结果是可接受的；受测者是顺从的、保守的；受测者可能在“装好”"],
@@ -200,40 +256,75 @@ var resultArray = [
   
   var damn = [3, 0, 4, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16];
   
-  function start_to_print_result(tscoreArray){
+function start_to_print_result(tscoreArray){
+  // helper: insert newNode right after refNode
+  function insertAfter(newNode, refNode){
+    if (!refNode || !refNode.parentNode){
+      document.body.appendChild(newNode);
+    } else {
+      refNode.parentNode.insertBefore(newNode, refNode.nextSibling);
+    }
+  }
+
+  // Anchor priority: therapistProfile -> therapyProfile -> profile text anchor -> charts -> body
+  var anchor = document.getElementById('therapistProfile')
+            || document.getElementById('therapyProfile')
+            || window._profile_text_anchor
+            || document.getElementById('myCharts')
+            || document.body;
+
     let table = document.createElement('table');
+
+    // 读取锚点宽度与左右外边距，保证表格与上方文案同宽、同对齐
+    var csAnchor = window.getComputedStyle(anchor);
+    var aWidth = csAnchor.width;
+    var aML = csAnchor.marginLeft;
+    var aMR = csAnchor.marginRight;
+
     table.style.borderCollapse = 'collapse';
-    table.style.width = '80%';
-    table.setAttribute('border', '3');
-    table.style.margin = 'auto';
-    table.setAttribute('bgcolor', '#B0C4DE');
-  
+    table.style.width = aWidth;          // 与锚点同宽
+    table.style.marginTop = '20px';
+    table.style.marginBottom = '20px';
+    table.style.marginLeft = aML;        // 与锚点对齐
+    table.style.marginRight = aMR;
+    table.style.backgroundColor = 'transparent';
+    table.style.color = '#FFFFFF';
+    table.style.border = '1px solid #B0C4DE';
+
+    // header row
     let headerRow = document.createElement('tr');
-    headerRow.style.borderBottom = '2px solid black';
+    headerRow.style.backgroundColor = 'rgba(255,255,255,0.08)';
+    headerRow.style.borderBottom = '1px solid #B0C4DE';
     table.appendChild(headerRow);
-  
+
     let header1 = document.createElement('th');
     header1.textContent = '各量表的一致性T分';
-    header1.style.padding = '8px';
-    header1.style.borderRight = '1px solid black';
+    header1.style.padding = '10px';
+    header1.style.borderRight = '1px solid #B0C4DE';
+    header1.style.textAlign = 'left';
+    header1.style.color = '#FFFFFF';
     headerRow.appendChild(header1);
-  
+
     let header2 = document.createElement('th');
     header2.textContent = '最基本的部分解释';
-    header2.style.padding = '8px';
+    header2.style.padding = '10px';
+    header2.style.textAlign = 'left';
+    header2.style.color = '#FFFFFF';
     headerRow.appendChild(header2);
-  
+
     for (let i = 0; i < 13; i++) {
       if (i === 7) { continue; } // 跳过 Mf
       let row = document.createElement('tr');
+      row.style.borderTop = '1px solid #B0C4DE';
       table.appendChild(row);
-  
+
       let cell1 = document.createElement('td');
       cell1.textContent = resultArray[i][0] + ' : ' + tscoreArray[damn[i]];
-      cell1.style.padding = '8px';
-      cell1.style.borderRight = '1px solid black';
+      cell1.style.padding = '10px';
+      cell1.style.borderRight = '1px solid #B0C4DE';
+      cell1.style.verticalAlign = 'top';
       row.appendChild(cell1);
-  
+
       let cell2 = document.createElement('td');
       if (tscoreArray[damn[i]] >= resultArray[i][1]) {
         cell2.textContent = resultArray[i][3];
@@ -242,12 +333,14 @@ var resultArray = [
       } else {
         cell2.textContent = resultArray[i][5];
       }
-      cell2.style.padding = '8px';
+      cell2.style.padding = '10px';
+      cell2.style.verticalAlign = 'top';
       row.appendChild(cell2);
     }
-  
-    document.body.appendChild(table);
-  }
+
+    // place table right after the therapist section to avoid blank space
+    insertAfter(table, anchor);
+}
   
   function start_to_creat_profile(tscoreArray){
     let percentileArray = [];
@@ -277,17 +370,18 @@ var resultArray = [
       if (isNaN(codeType[0]) || isNaN(codeType[1])) codeType[0] = codeType[1] = 0;
       let cnScale = ['社会内向','疑病','抑郁','癔症','精神病态','','偏执','精神衰弱','精神分裂','轻躁狂'];
       cnScale[5] = gender ? '男性气质' : '女性气质';
-  
+
       var title = document.createElement('h3');
       title.style.color = '#FFFFFF';
       title.textContent = '受测者的编码型是: ' + codeType[0] + codeType[1] + '('+cnScale[codeType[0]]+'和'+cnScale[codeType[1]]+')';
-  
+
       var description = document.createElement('p');
       description.style.color = '#FFFFFF';
       description.textContent = profileArray[codeType[0]][codeType[1]];
-  
+
       profileChart.parentNode.insertBefore(title, profileChart.nextSibling);
       profileChart.parentNode.insertBefore(description, title.nextSibling);
+      window._profile_text_anchor = description;
       return codeType;
     }
   
