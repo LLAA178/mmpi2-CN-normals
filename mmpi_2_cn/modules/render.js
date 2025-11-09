@@ -3,16 +3,19 @@
 
 // —— Helpers used by start_to_creat_profile ——
 function erf(x) {
-    const a1 =  0.254829592;
-    const a2 = -0.284496736;
-    const a3 =  1.421413741;
-    const a4 = -1.453152027;
-    const a5 =  1.061405429;
-    const p  =  0.3275911;
-    const t = 1.0 / (1.0 + p * x);
-    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-    return y;
-  }
+  const a1 =  0.254829592;
+  const a2 = -0.284496736;
+  const a3 =  1.421413741;
+  const a4 = -1.453152027;
+  const a5 =  1.061405429;
+  const p  =  0.3275911;
+  // Save the sign of x and work with |x|
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x);
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return sign * y;
+}
   
 // —— Ensure therapy/therapist text blocks exist ——
 function ensureProfileTextBlocks(){
@@ -65,7 +68,7 @@ function ensureProfileTextBlocks(){
     anchorEl = tp; // 下一块接在疗法建议之后
   }
   if (!document.getElementById('therapistProfile')){
-    var tsp = makeBlock('therapistProfile', 'Therapist 解读', 'therapistText');
+    var tsp = makeBlock('therapistProfile', '咨询师解读', 'therapistText');
     insertAfter(tsp, anchorEl);
   }
 }
@@ -364,9 +367,11 @@ function start_to_print_result(tscoreArray){
   function start_to_creat_profile(tscoreArray){
     let percentileArray = [];
     function calculatePercentile(tScore) {
-      let zScore = (tScore - 50) / 10;
-      let percentile = (1 + erf(zScore / Math.sqrt(2))) / 2;
-      return percentile * 100;
+      const z = (tScore - 50) / 10;
+      const p = (1 + erf(z / Math.SQRT2)) / 2; // p in [0,1]
+      const pct = p * 100;
+      // Clamp to [0, 100] to avoid edge-case rounding artifacts
+      return Math.max(0, Math.min(100, pct));
     }
     tscoreArray.forEach(tScore => { percentileArray.push(calculatePercentile(tScore).toFixed(2)); });
   
